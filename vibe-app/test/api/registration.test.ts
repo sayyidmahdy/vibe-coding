@@ -1,4 +1,4 @@
-import { POST } from './route'
+import { POST } from '@/app/api/users/route'
 import { UserService } from '@/services/users-service'
 import { NextRequest } from 'next/server'
 
@@ -8,6 +8,7 @@ jest.mock('@/services/users-service', () => ({
     registerUser: jest.fn(),
   },
 }))
+
 
 
 describe('POST /api/users', () => {

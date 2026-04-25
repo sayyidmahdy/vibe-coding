@@ -1,9 +1,9 @@
-import { UserService } from './users-service'
-import prisma from '../lib/prisma-lib'
+import { UserService } from '@/services/users-service'
+import prisma from '@/lib/prisma-lib'
 import bcrypt from 'bcryptjs'
 
 // Mock Prisma
-jest.mock('../lib/prisma-lib', () => ({
+jest.mock('@/lib/prisma-lib', () => ({
   __esModule: true,
   default: {
     user: {
@@ -20,6 +20,7 @@ jest.mock('bcryptjs', () => ({
     hash: jest.fn(),
   },
 }))
+
 
 
 describe('UserService', () => {
