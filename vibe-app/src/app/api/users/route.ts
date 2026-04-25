@@ -15,6 +15,14 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (name.length > 255) {
+      return NextResponse.json(
+        { message: 'Name must be at most 255 characters' },
+        { status: 400 }
+      )
+    }
+
+
     if (!isValidEmail(email)) {
       return NextResponse.json({ message: 'Invalid email' }, { status: 400 })
     }
