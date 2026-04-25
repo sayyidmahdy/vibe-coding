@@ -98,7 +98,15 @@ Menghapus sesi pengguna dari database agar token tidak dapat digunakan lagi.
 
 ---
 
+## 📖 Dokumentasi API (Swagger UI)
+Aplikasi ini dilengkapi dengan dokumentasi interaktif menggunakan **Swagger UI**. Anda dapat melihat detail endpoint, skema request/response, serta melakukan uji coba API secara langsung melalui browser.
+
+- **URL Dokumentasi**: `http://localhost:3000/api-docs`
+
+---
+
 ## 🚀 Cara Setup & Run Aplikasi
+
 
 ### 1. Persiapan Awal
 Pastikan Anda sudah menginstal Node.js dan npm. Clone repository ini, lalu masuk ke direktori proyek (`cd vibe-app`).
