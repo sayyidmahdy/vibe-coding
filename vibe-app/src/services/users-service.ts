@@ -1,7 +1,8 @@
 import bcrypt from 'bcryptjs'
 import prisma from '../lib/prisma-lib'
 
-import { RegisterUserRequest, UserResponse } from '../types/user'
+import { RegisterUserRequest, UserResponse } from '../interfaces/user'
+
 
 export class UserService {
   static async registerUser(data: RegisterUserRequest): Promise<UserResponse> {
