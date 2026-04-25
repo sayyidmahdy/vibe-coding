@@ -2,10 +2,11 @@ import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import prisma from '../lib/prisma-lib'
 import { LoginRequest, LoginResponse } from '../interfaces/session'
+import { UserResponse } from '../interfaces/user'
 
 export class SessionService {
   static async loginUser(data: LoginRequest): Promise<LoginResponse> {
-    // 1. Find user by email
+    // ... (tetap sama)
     const user = await prisma.user.findUnique({
       where: { email: data.email },
     })
@@ -14,16 +15,13 @@ export class SessionService {
       throw new Error('Invalid credentials')
     }
 
-    // 2. Verify password
     const isPasswordValid = await bcrypt.compare(data.password, user.password)
     if (!isPasswordValid) {
       throw new Error('Invalid credentials')
     }
 
-    // 3. Generate UUID token
     const token = crypto.randomUUID()
 
-    // 4. Save session to database
     await prisma.session.create({
       data: {
         token: token,
@@ -33,4 +31,25 @@ export class SessionService {
 
     return { token }
   }
+
+  static async getCurrentUser(token: string): Promise<UserResponse> {
+    const session = await prisma.session.findFirst({
+      where: { token: token },
+      include: {
+        user: true,
+      },
+    })
+
+    if (!session) {
+      throw new Error('unauthorized')
+    }
+
+    return {
+      id: session.user.id,
+      name: session.user.name,
+      email: session.user.email,
+      created_at: session.user.created_at,
+    }
+  }
 }
+
