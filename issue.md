@@ -1,83 +1,58 @@
-# Implementasi Swagger UI untuk Dokumentasi API
+# Integrasi Metronic Tailwind Next.js Landings
 
 ## Deskripsi Tugas
-Menambahkan fitur **Swagger UI** ke dalam aplikasi Next.js agar *developer* atau *user* lain dapat dengan mudah melihat, membaca dokumentasi, dan melakukan uji coba (testing) terhadap seluruh endpoint API secara langsung melalui antarmuka web yang interaktif.
+Melakukan ekstraksi, penyalinan, dan integrasi *template* **Metronic Tailwind Next.js Landings** ke dalam proyek `vibe-app` saat ini. Source file Metronic sudah tersedia di lokal komputer dalam format ZIP. Integrasi ini bertujuan menggabungkan komponen antarmuka modern dari Metronic dengan arsitektur *backend*/API yang sudah dibangun.
 
-Halaman dokumentasi ini nantinya dapat diakses melalui URL: `/api-docs` (atau `/swagger`).
+**Referensi Dokumentasi:** [Metronic Next.js Docs](https://docs.keenthemes.com/metronic-nextjs)
 
 ---
 
 ## Tahapan Implementasi (Panduan Detail untuk Junior Programmer / AI)
 
-Ikuti langkah-langkah berikut secara berurutan untuk mengimplementasikan Swagger:
+Ikuti tahapan ini secara berurutan agar integrasi *template* tidak merusak fungsionalitas sistem yang sudah ada:
 
-### Langkah 1: Instalasi Library
-Kita akan menggunakan library bawaan React untuk merender Swagger UI.
-1. Buka terminal, pastikan berada di folder proyek (`vibe-app`).
-2. Jalankan perintah instalasi library utama:
+### Langkah 1: Ekstraksi File ZIP
+File master Metronic berada di `c:\downloads\metronic.zip`.
+1. Ekstrak file tersebut ke dalam folder sementara, misalnya di `c:\downloads\metronic_extracted`.
+   *(Gunakan perintah ekstraksi melalui terminal atau GUI bawaan Windows).*
+2. Telusuri folder hasil ekstraksi dan temukan folder spesifik bernama **`metronic-tailwind-nextjs-landings`**. Folder ini yang akan digunakan sebagai sumber referensi kode UI.
+
+### Langkah 2: Penyalinan Asset dan Komponen
+Pindahkan struktur UI Metronic ke dalam proyek utama.
+1. Salin (copy) folder-folder esensial dari `metronic-tailwind-nextjs-landings/src/` ke dalam `vibe-app/src/`. Biasanya meliputi:
+   - `components/` (Berisi base UI seperti button, input, dari Radix UI/KeenThemes)
+   - `layouts/` (Berisi *wrapper* layout halaman landing)
+   - `core/` atau `hooks/` (Fungsi utilitas UI)
+   - `providers/` (State management UI, misal untuk *dark mode*)
+   - `assets/` atau `config/` (Jika ada)
+2. Salin isi dari folder `metronic-tailwind-nextjs-landings/public/` (seperti gambar, icon, font) ke dalam direktori `vibe-app/public/`.
+
+### Langkah 3: Sinkronisasi Dependensi (package.json)
+Metronic bergantung pada pustaka eksternal untuk *styling* dan komponen.
+1. Buka file `package.json` yang berada di dalam folder `metronic-tailwind-nextjs-landings`.
+2. Bandingkan dengan file `package.json` milik `vibe-app`.
+3. Pindahkan *dependencies* yang belum ada (terutama yang berkaitan dengan antarmuka seperti `@radix-ui/*`, `clsx`, `tailwind-merge`, `lucide-react`, `next-themes`) ke dalam `vibe-app`.
+4. Jalankan proses instalasi:
    ```bash
-   npm install swagger-ui-react
+   npm install
    ```
-3. Instal juga *type definitions* untuk TypeScript:
+   *(Peringatan: Jangan men-downgrade versi Next.js atau Prisma yang sudah terinstal di vibe-app).*
+
+### Langkah 4: Sinkronisasi Konfigurasi Tailwind & CSS
+1. Buka file `tailwind.config.ts` (atau `.js`) milik Metronic, lalu salin bagian `theme`, `plugins`, dan pengaturan warna/font ke dalam `vibe-app/tailwind.config.ts`.
+2. Pastikan *property* `content` di file Tailwind mencakup seluruh *path* file komponen baru (contoh: `"./src/components/**/*.{js,ts,jsx,tsx}"`).
+3. Buka file CSS global Metronic (misalnya `globals.css` atau `style.css`), lalu salin *custom utilities* atau variabel CSS-nya ke dalam `vibe-app/src/app/globals.css`.
+
+### Langkah 5: Setup Global Providers (layout.tsx)
+Metronic membutuhkan *Provider* untuk memastikan fungsionalitas UI berjalan lancar.
+1. Buka file `vibe-app/src/app/layout.tsx`.
+2. Impor komponen *Provider* dari Metronic (seperti `ThemeProvider` atau provider bawaan mereka dari folder `src/providers/`).
+3. Bungkus tag `<body>` atau properti `{children}` dengan komponen *Provider* tersebut.
+
+### Langkah 6: Uji Coba dan Verifikasi
+1. Jalankan aplikasi:
    ```bash
-   npm install -D @types/swagger-ui-react
+   npm run dev
    ```
-
-### Langkah 2: Membuat Konfigurasi Spesifikasi OpenAPI (JSON)
-Kita perlu mendefinisikan spesifikasi API kita menggunakan format OpenAPI 3.0.
-1. Buat file baru di `src/lib/swagger.ts` (buat folder jika belum ada).
-2. Di dalam file tersebut, buat objek berformat OpenAPI yang berisi definisi semua rute. Struktur dasarnya seperti ini:
-   ```typescript
-   export const swaggerSpec = {
-     openapi: '3.0.0',
-     info: {
-       title: 'Vibe App API Documentation',
-       version: '1.0.0',
-       description: 'Dokumentasi untuk backend authentication Vibe App.',
-     },
-     components: {
-       securitySchemes: {
-         BearerAuth: {
-           type: 'http',
-           scheme: 'bearer',
-           bearerFormat: 'UUID', // Karena kita menggunakan UUID token
-         },
-       },
-     },
-     paths: {
-       // TODO: Definisikan POST /api/users di sini
-       // TODO: Definisikan POST /api/users/login di sini
-       // TODO: Definisikan GET /api/users/current di sini (tambahkan security: [{ BearerAuth: [] }])
-       // TODO: Definisikan DELETE /api/users/logout di sini (tambahkan security: [{ BearerAuth: [] }])
-     },
-   };
-   ```
-   *(Tugas Implementator: Lengkapi blok `paths` di atas secara detail untuk ke-4 API yang sudah ada, termasuk request body dan responsenya).*
-
-### Langkah 3: Membuat Halaman UI (Next.js Page)
-Langkah ini berfungsi untuk menampilkan halaman antarmuka visual Swagger.
-1. Buat direktori/folder baru untuk rute *frontend*: `src/app/api-docs`.
-2. Di dalamnya, buat file `page.tsx` (`src/app/api-docs/page.tsx`).
-3. Tulis kode berikut. **Penting:** Pastikan menggunakan direktif `'use client'` karena komponen ini merender UI interaktif di sisi klien.
-   ```tsx
-   'use client';
-
-   import SwaggerUI from 'swagger-ui-react';
-   import 'swagger-ui-react/swagger-ui.css'; // Wajib di-import agar style-nya muncul
-   import { swaggerSpec } from '@/lib/swagger'; // Path import sesuaikan dengan Langkah 2
-
-   export default function ApiDocsPage() {
-     return (
-       <div className="container mx-auto p-4">
-         <SwaggerUI spec={swaggerSpec} />
-       </div>
-     );
-   }
-   ```
-
-### Langkah 4: Verifikasi & Uji Coba
-1. Jalankan *development server*: `npm run dev`.
-2. Buka browser dan navigasi ke: `http://localhost:3000/api-docs`.
-3. Anda seharusnya melihat halaman UI Swagger.
-4. Pastikan ada tombol hijau **"Authorize"** di kanan atas (karena kita mendefinisikan `securitySchemes`).
-5. Coba lakukan simulasi login melalui Swagger, lalu *copy* tokennya, masukkan ke tombol "Authorize", dan coba panggil API `GET /api/users/current`. Pastikan responsenya berhasil.
+2. Pastikan server berhasil berjalan tanpa error.
+3. Buat halaman *dummy* sementara (contoh: `/test-ui`) dan panggil salah satu komponen Metronic (contoh: tombol atau *card*) untuk memverifikasi bahwa Tailwind dan skrip interaktifnya berfungsi dengan baik.
