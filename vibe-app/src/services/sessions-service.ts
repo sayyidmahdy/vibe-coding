@@ -53,18 +53,15 @@ export class SessionService {
   }
 
   static async logoutUser(token: string): Promise<void> {
-    const session = await prisma.session.findFirst({
+    const result = await prisma.session.deleteMany({
       where: { token: token },
     })
 
-    if (!session) {
+    if (result.count === 0) {
       throw new Error('unauthorized')
     }
-
-    await prisma.session.delete({
-      where: { id: session.id },
-    })
   }
 }
+
 
 
