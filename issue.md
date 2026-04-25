@@ -1,65 +1,83 @@
-# Penulisan Unit Test untuk Seluruh API
+# Implementasi Swagger UI untuk Dokumentasi API
 
 ## Deskripsi Tugas
-Melakukan penulisan *unit test* secara komprehensif untuk seluruh endpoint API yang tersedia guna memastikan stabilitas sistem. Semua file *unit test* harus dikumpulkan secara terpusat di dalam folder baru bernama `test/` pada root proyek.
+Menambahkan fitur **Swagger UI** ke dalam aplikasi Next.js agar *developer* atau *user* lain dapat dengan mudah melihat, membaca dokumentasi, dan melakukan uji coba (testing) terhadap seluruh endpoint API secara langsung melalui antarmuka web yang interaktif.
+
+Halaman dokumentasi ini nantinya dapat diakses melalui URL: `/api-docs` (atau `/swagger`).
 
 ---
 
-## Daftar Skenario Test (Test Cases)
+## Tahapan Implementasi (Panduan Detail untuk Junior Programmer / AI)
 
-### 1. API Registrasi (`POST /api/users`)
-**Skenario Sukses:**
-- Berhasil mendaftarkan user baru dan mengembalikan status 201 dengan data user (id, name, email, created_at).
+Ikuti langkah-langkah berikut secara berurutan untuk mengimplementasikan Swagger:
 
-**Skenario Gagal:**
-- Mengembalikan status 400 jika ada *field* (name, email, password) yang kosong.
-- Mengembalikan status 400 jika format email tidak valid.
-- Mengembalikan status 400 jika password kurang dari 6 karakter.
-- Mengembalikan status 400 jika jumlah karakter nama lebih dari 255 karakter.
-- Mengembalikan status 400 jika email yang didaftarkan sudah ada di database.
+### Langkah 1: Instalasi Library
+Kita akan menggunakan library bawaan React untuk merender Swagger UI.
+1. Buka terminal, pastikan berada di folder proyek (`vibe-app`).
+2. Jalankan perintah instalasi library utama:
+   ```bash
+   npm install swagger-ui-react
+   ```
+3. Instal juga *type definitions* untuk TypeScript:
+   ```bash
+   npm install -D @types/swagger-ui-react
+   ```
 
-### 2. API Login (`POST /api/users/login`)
-**Skenario Sukses:**
-- Berhasil login dan mengembalikan status 200 beserta token UUID saat email dan password sesuai.
+### Langkah 2: Membuat Konfigurasi Spesifikasi OpenAPI (JSON)
+Kita perlu mendefinisikan spesifikasi API kita menggunakan format OpenAPI 3.0.
+1. Buat file baru di `src/lib/swagger.ts` (buat folder jika belum ada).
+2. Di dalam file tersebut, buat objek berformat OpenAPI yang berisi definisi semua rute. Struktur dasarnya seperti ini:
+   ```typescript
+   export const swaggerSpec = {
+     openapi: '3.0.0',
+     info: {
+       title: 'Vibe App API Documentation',
+       version: '1.0.0',
+       description: 'Dokumentasi untuk backend authentication Vibe App.',
+     },
+     components: {
+       securitySchemes: {
+         BearerAuth: {
+           type: 'http',
+           scheme: 'bearer',
+           bearerFormat: 'UUID', // Karena kita menggunakan UUID token
+         },
+       },
+     },
+     paths: {
+       // TODO: Definisikan POST /api/users di sini
+       // TODO: Definisikan POST /api/users/login di sini
+       // TODO: Definisikan GET /api/users/current di sini (tambahkan security: [{ BearerAuth: [] }])
+       // TODO: Definisikan DELETE /api/users/logout di sini (tambahkan security: [{ BearerAuth: [] }])
+     },
+   };
+   ```
+   *(Tugas Implementator: Lengkapi blok `paths` di atas secara detail untuk ke-4 API yang sudah ada, termasuk request body dan responsenya).*
 
-**Skenario Gagal:**
-- Mengembalikan status 400 jika *field* (email, password) kosong.
-- Mengembalikan status 400 jika format email tidak valid.
-- Mengembalikan status 401 (Invalid credentials) jika email tidak ditemukan.
-- Mengembalikan status 401 (Invalid credentials) jika password salah.
+### Langkah 3: Membuat Halaman UI (Next.js Page)
+Langkah ini berfungsi untuk menampilkan halaman antarmuka visual Swagger.
+1. Buat direktori/folder baru untuk rute *frontend*: `src/app/api-docs`.
+2. Di dalamnya, buat file `page.tsx` (`src/app/api-docs/page.tsx`).
+3. Tulis kode berikut. **Penting:** Pastikan menggunakan direktif `'use client'` karena komponen ini merender UI interaktif di sisi klien.
+   ```tsx
+   'use client';
 
-### 3. API Get Current User (`GET /api/users/current`)
-**Skenario Sukses:**
-- Berhasil mengembalikan status 200 beserta objek data user jika token yang dikirimkan di *header* valid.
+   import SwaggerUI from 'swagger-ui-react';
+   import 'swagger-ui-react/swagger-ui.css'; // Wajib di-import agar style-nya muncul
+   import { swaggerSpec } from '@/lib/swagger'; // Path import sesuaikan dengan Langkah 2
 
-**Skenario Gagal:**
-- Mengembalikan status 401 jika header `Authorization` tidak disertakan.
-- Mengembalikan status 401 jika format header salah (tidak menggunakan "Bearer ").
-- Mengembalikan status 401 jika token tidak ditemukan di database sesi.
+   export default function ApiDocsPage() {
+     return (
+       <div className="container mx-auto p-4">
+         <SwaggerUI spec={swaggerSpec} />
+       </div>
+     );
+   }
+   ```
 
-### 4. API Logout (`DELETE /api/users/logout`)
-**Skenario Sukses:**
-- Berhasil mengembalikan status 200 dengan pesan "Logout success" jika token valid dan sesi berhasil dihapus dari database.
-
-**Skenario Gagal:**
-- Mengembalikan status 401 jika header `Authorization` tidak disertakan atau formatnya salah.
-- Mengembalikan status 401 jika token tidak ditemukan di database sesi.
-
----
-
-## Tahapan Implementasi (Panduan High-Level)
-
-1. **Penyesuaian Struktur Folder**
-   - Buat folder `test/` di root proyek.
-   - Pindahkan *unit test* registrasi yang mungkin sudah ada (misal `route.test.ts` atau `users-service.test.ts`) ke dalam folder `test/` dan rapikan penamaannya (misalnya `test/api/auth.test.ts`).
-   
-2. **Penyesuaian Konfigurasi Jest**
-   - Pastikan file `jest.config.js` di-update agar mendeteksi file test di dalam folder `test/` secara otomatis.
-   
-3. **Penulisan Skenario Test**
-   - Gunakan fitur *mocking* Jest (`jest.mock`) untuk me-mock *Prisma Client* dan *Bcrypt* agar test berjalan secara terisolasi tanpa menyentuh database asli.
-   - Implementasikan seluruh skenario sukses dan gagal untuk keempat API di atas menggunakan struktur `describe` dan `it` yang jelas.
-   - Lakukan asersi (*assertion*) terhadap **status code HTTP** dan **response body** dari masing-masing *route*.
-
-4. **Verifikasi**
-   - Jalankan perintah `npm test` atau `npm run test` untuk memastikan semua skenario berhasil dilewati (PASS) tanpa ada error.
+### Langkah 4: Verifikasi & Uji Coba
+1. Jalankan *development server*: `npm run dev`.
+2. Buka browser dan navigasi ke: `http://localhost:3000/api-docs`.
+3. Anda seharusnya melihat halaman UI Swagger.
+4. Pastikan ada tombol hijau **"Authorize"** di kanan atas (karena kita mendefinisikan `securitySchemes`).
+5. Coba lakukan simulasi login melalui Swagger, lalu *copy* tokennya, masukkan ke tombol "Authorize", dan coba panggil API `GET /api/users/current`. Pastikan responsenya berhasil.
